@@ -16,7 +16,7 @@ setUpPlot <- function(ids, ytext, topOrBottom, xvals){
         axis(2, at = seq(0, 1, by = .25), labels = paste(seq(0, 1, by = .25)*100, "%", sep = ""), las = 2)
         mtext(ytext, side = 2, line = 3.5)
         if(topOrBottom == "top"){
-            legend("topleft", c("LN", "PBMC", "Vagina", "Gut", "PBMC/Plasma", "Mean"),
+            legend("topleft", c("PBMC/Plasma", "PBMC", "LN", "Gut", "Vagina", "Mean"),
                    col = c(cols,"black"),
                    pch = c(16),
                    lty = c("solid", "solid", "solid", "solid", "solid"),
@@ -55,7 +55,7 @@ for(id in monknames){
 }
 
 
-pdf("../out/graphs/RNADNAoverlap.pdf", height = 5, width = 9)
+pdf("../out/graphs/S7.pdf", height = 5.25, width = 7.5)
 
 #Set up the layout of the plot
 layout(matrix(1:8, nrow = 2))
@@ -77,9 +77,8 @@ approxx <- rbind(c(13, 15, 20, 26, 26),
                  c(13, 15, 20, 26, 38),
                  c(13, 15, 20, 26, 44))
 
-compsToCheck <- c("LN", "PBMC", "VAG", "GUT", "PBMC_PLASMA")
-colpal <- brewer.pal(6, "Set2")
-cols <- c(colpal[2], colpal[3], colpal[6], colpal[1], colpal[4])
+compsToCheck <- c("PBMC_PLASMA", "PBMC","LN", "GUT", "VAG" )
+cols <- c("#228833", "#EE6677", "#AA3377", "#4477AA", "#66CCEE")
 
 
 for(ids in monknames){
@@ -126,7 +125,7 @@ for(ids in monknames){
         DNAinds <- intersect(DNAinds, potentialinds)
 
         #Set up the plot for that compartment
-        colInd <- which(compartment == c("LN", "PBMC", "VAG", "GUT", "PBMC_PLASMA"))
+        colInd <- which(compartment == compsToCheck)
 
         #For each of these time periods, we're going to break down
         # which vRNA and vDNA is present in a compartment 
@@ -168,7 +167,6 @@ for(ids in monknames){
         }
     }
 
- 
     setUpPlot(ids, "% vRNA without vDNA", "top", xvals)
 
     #For each compartment

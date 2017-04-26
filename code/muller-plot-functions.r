@@ -120,30 +120,37 @@ megaplot.gen <- function(monk, vectorofcomps, ylabs, maintitles){
         }
         currep <- currep + 1
     }
+
+    modifier <- 1.15
     didntprint <- c()
-    pdf(paste("../out/graphs/",monk,".pdf", sep = ""), width = 13,
-        height =5*length(ylabs))
+    png(paste("../out/graphs/",monk,".png", sep = ""),
+        height = 2250*modifier, width = 2625*.6, res = 300) #*length(ylabs))
     layout(matrix(1:length(vectorofcomps), ncol = 2, byrow = TRUE))
-    par(oma = c(6,12, 5, 1))
+    par(oma = c(3,6, 2.65, 0))
     countind <- 1
     for(samplocname in vectorofcomps){
         if(length(retInd.id.comp(monk, samplocname)) > 15){
             plotComp.new(monk, samplocname, colMap, nameMap)
             if(countind %% 2 == 1){
-                axis(2, at = seq(0, 30, by = 6),
-                     labels = paste(seq(0, 1, by = .2)*100, "%", sep = ""),
-                     cex.axis = 2, las = 2)
-                linenum <- 8
-                linenum2 <- 5.5
-                ylabval <- "Percentage of compartment"
-                mtext(ylabval, side = 2, line = linenum2, cex = 2)
-                mtext(ylabs[ceiling(countind/2)],  side = 2, line = linenum,  cex = 3)
+                axis(2, at = seq(0, 30, by = 7.5),
+                     labels = paste(seq(0, 1, by = .25)*100, "", sep = ""),
+                     cex.axis = 1, las = 2)
+                #ghee
+                linenum <- 4
+                linenum2 <- 2.5
+                ylabval <- "% of Compartment"
+                mtext(ylabval, side = 2, line = linenum2, cex = 1)
+                mtext(ylabs[ceiling(countind/2)],  side = 2, line = linenum,  cex = 1.5)
             }
             if(countind == 1){
-                mtext(maintitles[1], at = .25, side = 3, line = 1, outer = TRUE, cex = 3)
+                mtext(maintitles[1], at = .25, side = 3, line = 1, outer = TRUE, cex = 1.5)
             }
             if(countind == 2){
-                mtext(maintitles[2], at = .75, side = 3, line = 1, outer = TRUE, cex = 3)
+                mtext(maintitles[2], at = .75, side = 3, line = 1, outer = TRUE, cex = 1.5)
+                
+            }
+            if(countind == length(vectorofcomps)){
+                    mtext("Week Post-Infection", side =1, line =3, cex = 1.5)
             }
             if(countind >= (length(vectorofcomps) -1)){
                 xaxlabs.tmp <- as.numeric(colnames(haps.over.time))
@@ -156,8 +163,7 @@ megaplot.gen <- function(monk, vectorofcomps, ylabs, maintitles){
                         }
                     }
                 }
-                axis(1, at = xaxlabs, cex.axis = 2)
-                mtext("Week Post-Infection", at = .5, side =1, line = 5, outer = TRUE, cex = 3)
+                axis(1, at = xaxlabs, cex.axis = 1)
             }
         }else{
             didntprint <- c(didntprint, samplocname)
@@ -503,7 +509,7 @@ plotComp.new <- function(monk, subcomp, colors, labels){
     }
     
     uppery <- 30
-    par(mar = c(1, 1, 1, 1))
+    par(mar = c(1, 0, 0, 0))
     par(cex.main = 3)
     plot(0, type = "n", xlim = xlims.with.room, ylim = c(-1, uppery), xlab  = "", ylab = "", axes = FALSE, main = "", cex.lab = 2)
 
@@ -546,9 +552,9 @@ plotComp.new <- function(monk, subcomp, colors, labels){
         xToPlot <- kidsToPlot[[ access.kidsToPlot[1] ]]$mypoly$x
         currlab <- labelmaker(names(which(mut.relat[currInd,] == 1)), all.comp.inds)
        
-        polygon(xToPlot, yToPlot, col = colMap[nameMap == currlab], lwd = 2)
+        polygon(xToPlot, yToPlot, col = colMap[nameMap == currlab], lwd = 1) #lwd = 2
         if(isDRM(currlab) == 1){
-            polygon(xToPlot, yToPlot, col = "black", density = 4, border = NULL, lwd = 2)
+            polygon(xToPlot, yToPlot, col = "black", density = 4, border = NULL, lwd = 1) #lwd = 2
         }
         
        #first, we have to figure out where it appears first
@@ -579,7 +585,7 @@ plotComp.new <- function(monk, subcomp, colors, labels){
 
     }
 
-    abline(v = as.numeric(colnames(haps.over.time)), col = "black", lwd = 5)
+    abline(v = as.numeric(colnames(haps.over.time)), col = "black", lwd = 3)
 
     for(i in 1:nrow(labels.to.eventually.plot)){
         
@@ -587,39 +593,147 @@ plotComp.new <- function(monk, subcomp, colors, labels){
         print(ct)
 
         #Only print these labels
-        goodLabs <- c("M184V", "M184I", "M184V,N255N", "M184V,N255N,V179I", "M184V,V179I", "D177N,M184V,N255N", "L187L", "K103N-C,L187L", "K103N-T", "K103N-T,L187L", "K103N-C", "L74V", "K103N-C,K249K,L187L,L205L,Q174R","K249K,L187L,L205L,Q174R", "K249K,L187L,Q174R", "K223K", "L187L,M184V", "K223K,L109L,M184V,V75L", "L187L,M184V,M245T", "L205L,M184V,R277K", "K249K,L187L,L205L", "I270I,L214F", "L214F,M184V", "L214F", "L74V,T58T", "K223K,L187L,M184I", "L205L,M184V,R277K", "G262G,L205L", "K223K,L187L", "L187L,M245T", "M245T", "L205L", "K66K,L187L", "K66R", "WT")
+        goodLabs <- c("M184V",
+                      "M184I",
+                      "M184V,N255N",
+                      "M184V,N255N,V179I",
+                      "M184V,V179I",
+                      "D177N,M184V,N255N",
+                      "L187L",
+                      "K103N-C,L187L",
+                      "K103N-T",
+                      "K103N-T,L187L",
+                      "K103N-C",
+                      "L74V",
+                      "K103N-C,K249K,L187L,L205L,Q174R",
+                      "K249K,L187L,L205L,Q174R",
+                      "K249K,L187L,Q174R",
+                      "K223K",
+                      "L187L,M184V",
+                      "K223K,L109L,M184V,V75L",
+                      "L187L,M184V,M245T",
+                      "L205L,M184V,R277K",
+                      "K249K,L187L,L205L",
+                      "I270I,L214F",
+                      "L214F,M184V",
+                      "L214F",
+                      "L74V,T58T",
+                      "K223K,L187L,M184I",
+                      "L205L,M184V,R277K",
+                      "G262G,L205L",
+                      "K223K,L187L",
+                      "L187L,M245T",
+                      "M245T",
+                      "L205L",
+                      "K66K,L187L",
+                      "K66R",
+                      "WT")
         if(sum(ct == goodLabs) > 0){
 
+            #The plotting functionality is extremely convoluted because I wanted many 
+            # small changes to improve label visibility 
+            dashlwd <- 2
             ca <- as.numeric(labels.to.eventually.plot[i,1:4 ])
-            if(ca[1] == 26 & monk == "T98133"){
-                arrows(ca[1], ca[2], ca[1] - .15, ca[4], length = 0, lwd = 5)
-                colorLabel(ca[1] - .15 - nchar(ct)*.235, ca[2], ct)
-            }else if((ca[1] <= 29 & ca[1] >= 26) & monk == "A99165"){
-                arrows(ca[1], ca[2], ca[1] - .1, ca[4], length = 0, lwd = 5)
-                colorLabel(ca[1] - .5 - nchar(ct)*.235, ca[2], ct)
-            }else if(ca[1] == 38 & monk == "A99039"){
-                arrows(ca[1], ca[2], ca[1] - .135, ca[4], length = 0, lwd = 5)
-                colorLabel(ca[1] - .15 - nchar(ct)*.4, ca[2], ct)
-            }else{
-                arrows(ca[1], ca[2], ca[3], ca[4], length = 0, lwd = 5)
-                colorLabel(ca[3] + .15, ca[2], ct)
-            }         
+            if(!(length(grep("DNA", subcomp)) > 0 & ct == "K103N-C,K249K,L187L,L205L,Q174R")){
+
+                #This portion handles the text to the left of each line
+                if(ca[1] == 26 & monk == "T98133"){
+                    arrows(ca[1], ca[2], ca[1] - .15, ca[4], length = 0, lwd = dashlwd)
+                    colorLabel(ca[1] - .5 - nchar(ct)*.28, ca[2], ct)
+                }else if((ca[1] <= 29 & ca[1] >= 26) & monk == "A99165"){
+                    if(ct == "L214F,M184V" ){
+                        negoffset <- 4
+                        arrows(ca[1], ca[2]-negoffset, ca[1] - .3, ca[4]-negoffset,
+                               length = 0, lwd = dashlwd)
+                        colorLabel(ca[1] - 1.1 - nchar(ct)*.3, ca[2]-negoffset, ct)
+                    }else if(subcomp == "PLASMA" & ct == "K249K,L187L,L205L"){
+                        negoffset <- 1
+                        arrows(ca[1], ca[2]-negoffset, ca[1] - .3, ca[4]-negoffset,
+                               length = 0, lwd = dashlwd)
+                        colorLabel(ca[1] - 1.1 - nchar(ct)*.3, ca[2]-negoffset, ct)
+                    }else if(subcomp == "GUTRNA" & ct == "K249K,L187L,L205L"){
+                        negoffset <- -1
+                        arrows(ca[1], ca[2]-negoffset, ca[1] - .3, ca[4]-negoffset,
+                               length = 0, lwd = dashlwd)
+                        colorLabel(ca[1] - 1.1 - nchar(ct)*.3, ca[2]-negoffset, ct)
+                    }else if(subcomp == "GUTRNA" & ct == "K223K"){
+                        
+                    }else{
+                        arrows(ca[1], ca[2], ca[1] - .3, ca[4], length = 0, lwd = dashlwd)
+                        colorLabel(ca[1] - .9 - nchar(ct)*.3, ca[2], ct)
+                    }
+                }else if(ca[1] == 38 & monk == "A99039"){
+                    arrows(ca[1], ca[2], ca[1] - .5, ca[4], length = 0, lwd = dashlwd)
+                    colorLabel(ca[1] - 2.5 - nchar(ct)*.4, ca[2], ct)
+                #This portion handles the text to the right of each line
+                }else{
+                    if(monk == "A99165" & ct == "K223K"){
+                        negoffset <- -2
+                        arrows(ca[1], ca[2]-negoffset, ca[3] , ca[4]-negoffset,
+                               length = 0, lwd = dashlwd)
+                        colorLabel(ca[3] + .15, ca[2]-negoffset, ct)
+                    }else if((monk == "A99165" & ct == "K103N-C,K249K,L187L,L205L,Q174R") &
+                             subcomp == "PLASMA"){
+                        negoffset <- -1
+                        arrows(ca[1], ca[2]-negoffset, ca[3] , ca[4]-negoffset,
+                               length = 0, lwd = dashlwd)
+                        colorLabel(ca[3] + .15, ca[2]-negoffset, ct)
+                    }else if((monk == "A99165" & ct == "K249K,L187L,L205L,Q174R") &
+                             subcomp == "PLASMA"){
+                        negoffset <- .5
+                        arrows(ca[1], ca[2]-negoffset, ca[3] , ca[4]-negoffset,
+                               length = 0, lwd = dashlwd)
+                        colorLabel(ca[3] + .15, ca[2]-negoffset, ct)
+                    }else if((monk == "A99165" & ct == "K103N-C,L187L") &
+                             subcomp == "PBMCDNA"){
+                        negoffset <- 1.5
+                        arrows(ca[1], ca[2]-negoffset, ca[3] , ca[4]-negoffset,
+                               length = 0, lwd = dashlwd)
+                        colorLabel(ca[3] + .15, ca[2]-negoffset, ct)
+                    }else if((monk == "A99039" & ct == "K223K,L109L,M184V,V75L") &
+                             subcomp == "LNDNA"){
+                        arrows(ca[1], ca[2], ca[3] - 1 , ca[4],
+                               length = 0, lwd = dashlwd)
+                        colorLabel(ca[3] - 13, ca[2], ct)
+                    }else{
+                        mainoffset <- 0
+                        if(monk == "A99039"){ mainoffset <- .3 }
+                        arrows(ca[1], ca[2], ca[3] + mainoffset, ca[4], length = 0, lwd = dashlwd)
+                        colorLabel(ca[3] + mainoffset + .15, ca[2], ct)
+                    }
+
+                }
+            }
+                ## print(c(monk, ct))
+                ## #I want some extra custom plotting adjustments 
+                ## if( monk == "A99165" & ct == "L214F,M184V"){
+                ##     negoffset <- 10
+                ##     arrows(ca[1], ca[2] - negoffset, ca[3], ca[4] - negoffset, length = 0, lwd = dashlwd)
+                ##     colorLabel(ca[3] + .15, ca[2] - negoffset, ct)
+                ##     print("asdfasdfasdfasdf")
+                ## }else{
+
+                ##     arrows(ca[1], ca[2], ca[3], ca[4], length = 0, lwd = dashlwd)
+                ##     colorLabel(ca[3] + .15, ca[2], ct)
+
+                ## }
 
         }
     }
     plotTops <- apply(haps.over.time, 2, sum)
-    mtext(paste(plotTops), side = 3, line = 0, at = as.numeric(names(plotTops)))
+    mtext(paste(plotTops), side = 3, line = 0, at = as.numeric(names(plotTops)), cex = .5)
 
+    treatsize <- 1.25
     if(monk == "A99165"){
-        text(16, -1, "EFV", col = "white", cex = 2)    
-        text(27.5, -1, "Rx1", col = "white", cex = 2)
+        text(16, -1, "EFV", col = "white", cex = treatsize)    
+        text(27.5, -1, "Rx1", col = "white", cex = treatsize)
     }
     if(monk == "T98133"){
-        text(16, -1, "FTC", col = "white", cex = 2)    
+        text(16, -1, "FTC", col = "white", cex = treatsize)    
     }
     if(monk == "A99039"){
-        text(16, -1, "FTC", col = "white", cex = 2)    
-        text(32, -1, "Rx2 ", col = "white", cex = 2)
+        text(16, -1, "FTC", col = "white", cex = treatsize)    
+        text(32, -1, "Rx2 ", col = "white", cex = treatsize)
     }
 }
 
@@ -645,8 +759,8 @@ is.syn <- function(lab){
 
 #Plot the labels
 colorLabel <- function(xplot, yplot, lab){
-    sizeval <- 1.25
-    rval <- .3
+    sizeval <- .75
+    rval <- .1
     allmuts <- strsplit(lab, split = ",")[[1]]
     for(i in length(allmuts):1){
         currmut <- allmuts[i]
@@ -662,20 +776,5 @@ colorLabel <- function(xplot, yplot, lab){
         shadowtext(xplot, yplot, textToPlot, col = currcol, adj = c(0,0.5), cex = sizeval, r = rval)
     }
 }
-
-
-megaplot.gen("T98133",
-             c("PLASMA","PBMCDNA", "LNRNA", "LNDNA", "GUTRNA", "GUTDNA", "VAGRNA", "VAGDNA"),
-             c("Plasma/PBMC", "LN", "Gut", "Vagina"), c("A. vRNA", "B. vDNA"))
-megaplot.gen("A99165",
-             c("PLASMA","PBMCDNA", "LNRNA", "LNDNA", "GUTRNA", "GUTDNA"),
-             c("Plasma/PBMC", "LN", "Gut"), c("A. vRNA", "B. vDNA"))
-megaplot.gen("A99039",
-             c("PLASMA","PBMCDNA", "LNRNA", "LNDNA", "GUTRNA", "GUTDNA"),
-             c("Plasma/PBMC", "LN", "Gut"), c("A. vRNA", "B. vDNA"))
-
-
-
-
 
 

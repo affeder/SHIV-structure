@@ -70,3 +70,5 @@ tcol <- function(color, percent) {
                alpha = (100-percent)*255/100)
   return(t.col)
 }
+
+as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}

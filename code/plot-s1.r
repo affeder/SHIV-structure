@@ -60,14 +60,18 @@ plotfeatures <- function(monk, xvals, dnaorrna){
 
 
 
-pdf("../out/graphs/diversity.pdf", height = 5, width = 8)
+pdf("../out/graphs/S1.pdf", height = 4.75, width = 7.5)
 layout(matrix(1:8, nrow = 2))
 par(mar = c(1, 1, 0, 0))
 par(oma = c(4, 4, 2, 2))
-rnacomps <- c("VAGRNA", "PBMCRNA", "PLASMA", "LNRNA", "GUTRNA", "allrna")
-dnacomps <- c("VAGDNA", "PBMCDNA", "LNDNA", "GUTDNA", "alldna")
-rnacols <- c(brewer.pal(6, "Set2")[c(6, 3, 4, 2,1)], "black")
-dnacols <- c(brewer.pal(6, "Set2")[c(6, 3, 2,1)], "black")
+#Order: "Plasma", "PBMC",  "LN", "Gut", "Vagina"
+pal <- c("#228833", "#EE6677", "#AA3377", "#4477AA", "#66CCEE")
+#rnacomps <- c("VAGRNA", "PBMCRNA", "PLASMA", "LNRNA", "GUTRNA", "allrna")
+rnacomps <- c("PLASMA", "PBMCRNA", "LNRNA", "GUTRNA", "VAGRNA", "allrna")
+#dnacomps <- c("VAGDNA", "PBMCDNA", "LNDNA", "GUTDNA", "alldna")
+dnacomps <- c("PBMCDNA", "LNDNA", "GUTDNA", "VAGDNA", "alldna")
+rnacols <- c(pal, "black")
+dnacols <- c(pal[2:5], "black")
 ylimmax <- .0135
 ylimmin <- -.0005
 approxx <- rbind(c(13, 15, 20, 26, 26),
@@ -88,7 +92,7 @@ for(monk in monknames[1:4]){
     plotfeatures(monk, toPlotX, "vRNA")
     if(monk == "T98133"){
         #Plot a legend in the T98133 plot
-        legend("topleft", c("Vagina", "PBMC", "Plasma", "LN", "Gut"), col = c(rnacols),
+        legend("topleft", c("Plasma",  "PBMC", "LN", "Gut", "Vagina"), col = c(rnacols),
                pch = c(16), lty = c("solid", "solid", "solid", "solid"),
                pt.cex = .75, cex = .85, bg = "white") }
     #We are going to use allRNAs to do some linear regression comparison later in this script
@@ -269,5 +273,7 @@ for(monk in monknames){
     print(fm)
     print(anova(fm, nm))
 }
+
+
 
 

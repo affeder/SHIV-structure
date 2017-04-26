@@ -7,34 +7,28 @@ for(i in 2:ncol(dat)){
 
 
 #Determine the relevant week and compartmental information
-allweeks <- sort(unique(weeks))[-1]
-allcomps <- sort(unique(samp.loc))[-1]
+allweeks <- sort(unique(weeks))
+allcomps <- sort(unique(samp.loc))
 
-#Set up lists to keep track of the percentage drug resistant
-drm103list <- sapply(monknames,function(x) NULL)
-drm184list <- sapply(monknames,function(x) NULL)
-toAdd <- rep(NA, length(allweeks))
-names(toAdd) <- paste(allweeks)
-for(i in  monknames){
-    drm103list[[i]] <-  toAdd
-    drm184list[[i]] <-  toAdd
-}
-for(ids in monknames){
-    for(week.ind in 1:length(allweeks)){
-        #for the plasma froma  certain macaque at a certain week
-        relset <- which((monkid == ids & weeks == allweeks[week.ind]) & samp.loc == "PLASMA")
+drperc <- foreach(monk = monknames, .combine = 'rbind') %do%{
+    foreach(t = allweeks, .combine = 'rbind') %do%{
+        relset <- which((monkid == monk & weeks == t) & samp.loc == "PLASMA")
         if(length(relset) > 0){
-            #determine the percentage of DRMs present
-            drmdist <- newDRM.breakdown(relset)
-            drm103list[[ids]][week.ind] <- drmdist[1]
-            drm184list[[ids]][week.ind] <- drmdist[2]
+            K103Nperc <- sum(aa[relset,103] == "N")/length(relset)
+            M184Vperc <- sum(aa[relset,184] == "V")/length(relset) +
+                         sum(aa[relset,184] == "I")/length(relset)
+            c(monk, t, K103Nperc, M184Vperc)
         }
     }
 }
+dr <- tbl_df(drperc)
+colnames(dr) <- c("monkid", "week", "k103n", "m184v")
+dr <- dr %>% mutate( k103n = as.numeric(k103n), m184v = as.numeric(m184v),
+                    week = as.numeric(week))
 
 
-pdf("../out/graphs/VL.pdf", width = 8, height = 6)
-par(mar = c(1, 1,1,0))
+pdf("../out/graphs/F1.pdf", width = 7.5, height = 5.5)
+par(mar = c(1, 1, 1, 0))
 par(oma = c(3, 3, 1, 5))
 layout(matrix(1:4, nrow = 2))
 #max ylim value
@@ -48,44 +42,44 @@ maxvl <- max(dat, na.rm = TRUE)
 xlimmaxopts <- c(NA, 44, 29, 44, 29)
 #We'll plot a line for the final time point as well
 finaltimepoint <- c(NA, 44, 29, 38, 26)
-cols <- brewer.pal(8, "Set2")
 #This is the highlight color for the opposite axis
-altcol <- cols[2]
+altcol <- brewer.pal(3, "Set1")[1]
 
 for(monk in monknames){
     #Take the correct index for the data matrix
-    i <- which(monk == names(dat))
+    i <- which(monk == colnames(dat))
     #Use this index to derive graphical parameters
     xlimmax <- xlimmaxopts[i]
     finaltp <- finaltimepoint[i]
 
     #Set up plot and background:
-    plot(0, type = 'n', xlim = c(0, xlimmax), ylim = c(5, maxvl),
+    plot(0, type = 'n', xlim = c(0, xlimmax), ylim = c(5, maxvl*5),
          log = "y", axes = FALSE, xlab = "", cex.lab = 1.5, ylab = "")
     mtext(paste(monk), 3)
-    polygon(c(12, 20, 20, 12), c(.1, .1, 10^7, 10^7), col = "lightgrey", border = FALSE)
+    polygon(c(12, 20, 20, 12), c(.1, .1, 10^8, 10^8), col = "lightgrey", border = FALSE)
     abline(v = finaltp, col = "black", lty = "dotted")
     
     #If the macaque is T98133, plot the legend
     if(monk != "T98133"){
-        polygon(c(26, finaltp, finaltp, 26), c(.1, .1, 10^7, 10^7),
+        polygon(c(26, finaltp, finaltp, 26), c(.1, .1, 10^8, 10^8),
                 col = "lightgrey", border = FALSE)
-    }else{
-        legend("topleft", c("Viremia", "K103N", "M184I/V"),
-               col = c("black", altcol, altcol), pch = c(16, 16, 17),
-               lty = c("solid", "solid", "dashed"), box.col = "white", cex = .75)
-    }
+    }#else{
+       
+#    }
 
     #If the plot is on the bottom, set up the appropriate x axis
     if(monk == "A99165"){
         axis(1, cex.axis = 1.25, at = c(0, 12,20, 26, 39))
+         legend("topright", c("Viremia", "K103N", "M184I/V"),
+               col = c("black", altcol, altcol), pch = c(16, 16, 17),
+               lty = c("solid", "solid", "dashed"), box.col = "black", cex = 1, bg = "white")
     }
     if(monk == "A01198"){
         axis(1, cex.axis = 1.25, at = c(0, 12,20, 26, 38, 44))
     }
     #If the plot is on the left, set up the y-axis
     if(monk == "T98133"| monk == "A99165"){
-        eaxis(2, cex.axis = 1.25, at = 10^c(2:7))
+        eaxis(2, cex.axis = 1.25, at = 10^c(2:8))
     }
 
     #xToPlot is always the week in which the sample was taken
@@ -102,22 +96,20 @@ for(monk in monknames){
     par(new = T)
     plot(0, type = "n", axes = FALSE, ylim = c(-.085, 1), xlim = c(0, xlimmax),
          xlab = "", ylab = "")
-    
+
+    plotDat <- dr %>% filter(monkid == monk)
+    weeksToPlot <- c(plotDat['week'])$week
+
     #First, we'll plot K103N using one set up graphical parameters
-    toPlot <- drm103list[[monk]]
-    toExc <- which(is.na(toPlot))
-    weeksToPlot <- as.numeric(names(toPlot)[-toExc])
-    pointsToPlot <- toPlot[-toExc]
-    points(weeksToPlot, pointsToPlot, pch = 16, col = altcol, lty = "solid")
-    lines(weeksToPlot, pointsToPlot, col = altcol, lty = "solid")
+    k103n <- c(plotDat['k103n'])$k103n
+
+    points(c(weeksToPlot), c(k103n), pch = 16, col = altcol, lty = "solid")
+    lines(weeksToPlot, k103n, col = altcol, lty = "solid")
 
     #Second, we'll plot M184V/I using a different set of graphical parameters
-    toPlot <- drm184list[[monk]]
-    toExc <- which(is.na(toPlot))
-    weeksToPlot <- as.numeric(names(toPlot)[-toExc])
-    pointsToPlot <- toPlot[-toExc]
-    points(weeksToPlot, pointsToPlot, pch = 17, col = altcol, lty = "dashed")
-    lines(weeksToPlot, pointsToPlot, col = altcol, lty = "dashed")
+    m184v <- c(plotDat['m184v'])$m184v
+    points(weeksToPlot, m184v, pch = 17, col = altcol, lty = "dashed")
+    lines(weeksToPlot, m184v, col = altcol, lty = "dashed")
 
     #If the macaque is on the right, plot the second set of y-axes
     if(monk != "T98133" & monk != "A99165"){

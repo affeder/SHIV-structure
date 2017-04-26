@@ -6,9 +6,10 @@ newDRM.breakdown <- function(inds){
     c(freq103N, freq184V)
 }
 
+
 #Make a list of all weeks and compartments to check
-allweeks <- sort(unique(weeks))[-1]
-allcomps <- sort(unique(samp.loc))[-1]
+allweeks <- sort(unique(weeks))
+allcomps <- sort(unique(samp.loc))
 
 #Create a list by macaque of compartments versus time
 oneDRMlist <- sapply(monknames,function(x) NULL)
@@ -43,7 +44,7 @@ for(ids in monknames){
 
 
 
-pdf("../out/graphs/percent_drugresistant.pdf", width = 5, height =4)
+pdf("../out/graphs/F2.pdf", width = 5, height =4)
 #Graphical parameters
 layout(matrix(1:12, nrow = 4))
 par(oma = c(4, 5, 2, 7))
@@ -52,22 +53,27 @@ lwd1 <- 2
 lwd2 <- 2
 pchr <- 15
 pchd <- 16
-pal <- brewer.pal(8, "Set2")
+#Order: "Plasma", "PBMC",  "LN", "Gut", "Vagina"
+pal <- c("#228833", "#EE6677", "#AA3377", "#4477AA", "#66CCEE")
 
 #These are compartment indexed vectors
-cols <- c(pal[1], pal[1], pal[2], pal[2], pal[3], pal[3], pal[4], pal[6], pal[6])
+#They match the column headers of oneDRMlist
+
+cols <- c(pal[4], pal[4], pal[3], pal[3], pal[2], pal[2], pal[1], pal[5], pal[5])
 pchvals <- c(pchd, pchr, pchd, pchr, pchd, pchr, pchr, pchd, pchr)
 ltys <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "dashed", "solid", "dashed")
 
 #This is a macaque indexed vector
 maxes <- c(26,26,27,26)
 
+
 plotcomps <- rbind(c("PLASMA", "PBMCDNA"), c("LNRNA", "LNDNA"), c("GUTRNA", "GUTDNA"), c("VAGRNA", "VAGDNA"))
 #For each plotted macaque
 for(k in c(1, 3, 2)){
+
     maxweeks <- maxes[k]
     minweeks <- 12
-    
+
     for(comp.ind in 1:nrow(plotcomps)){
         #Set up the plot for each macaque/compartment and background elements
         plot(0, type = "n", xlim = c(minweeks, maxweeks), ylim = c(-.15, 1.05), xlab = "", ylab = "", axes = FALSE)
@@ -94,8 +100,8 @@ for(k in c(1, 3, 2)){
             #rnaind will hold the index that allows access to the correct column in oneDRMlist
             #and also the correct vector entry in various plotting functions
             rnaind <- which(plotcomps[comp.ind, rnaOrDnaCol] ==  colnames(oneDRMlist[[k]]))
-plotcomps[comp.ind, rnaOrDnaCol]
 
+            oneDRMlist[[k]]
             #Use that column index to determine which weeks we have information from
             oneDRM <- c()
             weekstoplot <- c()
@@ -106,7 +112,7 @@ plotcomps[comp.ind, rnaOrDnaCol]
                     oneDRM <- c(oneDRM, oneDRMlist[[k]][week.ind, rnaind] )
                 }
             }
-            
+
             if(length(weekstoplot) > 0){
                 #Plot both points and lines
                 weekstoplot <- as.numeric(weekstoplot)
@@ -120,5 +126,7 @@ plotcomps[comp.ind, rnaOrDnaCol]
 }
 mtext("Week Post-Infection", side = 1, outer = TRUE, line = 2.5)
 mtext("Frequency of drug-resistant vRNA or vDNA", side = 2, outer = TRUE, line = 3)
-legend(27, 3.5, c("Gut", "LN", "PBMC", "Plasma", "Vagina", "", "DNA", "RNA"), col = c(pal[1:4], pal[6],  "white", "black", "black"), pch = c(16, 16, 16, 16, 16,  NA, NA, NA ), lty = c(NA, NA, NA, NA, NA, NA, "solid", "dashed"), xpd = NA ,lwd = lwd1, pt.cex = 1.5, box.col = "white")
+legend(27, 3.5, c("Plasma", "PBMC",  "LN", "Gut", "Vagina", "", "DNA", "RNA"), col = c(pal,  "white", "black", "black"), pch = c(16, 16, 16, 16, 16,  NA, NA, NA ), lty = c(NA, NA, NA, NA, NA, NA, "solid", "dashed"), xpd = NA ,lwd = lwd1, pt.cex = 1.5, box.col = "white")
 dev.off()
+
+
